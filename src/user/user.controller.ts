@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, InternalServerErrorException, Param, Post, Put } from '@nestjs/common';
 import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
-import { UserDto, UpdateUser } from './dto/user.dto';
+import { UserDto, UpdateUser, AddUser } from './dto/user.dto';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -10,7 +10,7 @@ export class UserController {
 
   @Post('/create')
   @HttpCode(HttpStatus.CREATED)
-  createUser(@Body() payload: UserDto): {}{
+  createUser(@Body() payload: AddUser): {}{
     const userUuid = this.userService.createUser(payload);
     return { userUuid: userUuid }
   }
@@ -32,7 +32,7 @@ export class UserController {
   @Put()
   @HttpCode(HttpStatus.OK)
   updateUser(@Body() body: UpdateUser): UserDto {
-    const userEdited: UserDto = this.userService.editUser(body.uuid, body.age, body.name);
+    const userEdited: UserDto = this.userService.editUser(body.uuid, body.age, body.username);
     return userEdited;
   }
 

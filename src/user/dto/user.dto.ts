@@ -9,7 +9,7 @@ export class UserDto {
 
   @IsNotEmpty()
   @IsString()
-  name: string;
+  username: string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -25,4 +25,6 @@ export class UserDto {
 
 }
 
-export class UpdateUser extends PickType(UserDto, ['uuid', 'name', 'age'] as const){}
+export class UpdateUser extends PickType(UserDto, ['uuid', 'username', 'age'] as const){}
+
+export class AddUser extends PickType(UserDto, ['username', 'age'] as const){}

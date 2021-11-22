@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UserDto } from './dto/user.dto';
+import { AddUser, UserDto } from './dto/user.dto';
 import { v4 as uuidv4 } from 'uuid';
 
 let users: UserDto[] = [];
@@ -10,10 +10,10 @@ export class UserService {
 
   constructor(){}
 
-  createUser(payload: UserDto): string{
+  createUser(payload: AddUser): string{
     let newUser = new UserDto();
     newUser.uuid = uuidv4();
-    newUser.name = payload.name;
+    newUser.username = payload.username;
     newUser.age = payload.age;
     newUser.createdAt = new Date();
     newUser.updatedAt = new Date();
@@ -54,7 +54,7 @@ export class UserService {
     let userFinded = false;
     for(let u of users){
       if(u.uuid == uuid){
-        u.name = (name != undefined) || (name != '') ? name : u.name;
+        u.username = (name != undefined) || (name != '') ? name : u.username;
         u.age = age != undefined ? age : u.age;
         u.updatedAt = new Date();
         user = u;
