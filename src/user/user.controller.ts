@@ -40,7 +40,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   deleteUser(@Param('uuid') uuid: string){
     const uuidDeleted: string = this.userService.deleteUser(uuid);
-    return `The user with uuid ${uuid} was deleted`;
+    return `The user with uuid ${uuidDeleted} was deleted`;
   }
 
 }
