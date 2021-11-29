@@ -1,6 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { AddUser, UserDto } from './dto/user.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
 
 let users: UserDto[] = [];
 let user: UserDto;
@@ -8,16 +11,17 @@ let user: UserDto;
 @Injectable()
 export class UserService { 
 
-  constructor(){}
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>
+  ){}
 
-  createUser(payload: AddUser): string{
-    let newUser = new UserDto();
-    newUser.uuid = uuidv4();
+  async createUser(payload: AddUser): Promise<string>{
+    let newUser = this.usersRepository.create();
     newUser.username = payload.username;
     newUser.age = payload.age;
-    newUser.createdAt = new Date();
-    newUser.updatedAt = new Date();
-    users.push(newUser);
+    newUser = await this.usersRepository.save(newUser);
+    console.log(`newUser.uuid`, newUser.uuid);
     return newUser.uuid;
   }
 
@@ -29,56 +33,49 @@ export class UserService {
   //   }
   // }
 
-  getAllUsers(): UserDto[] | string {
+  async getAllUsers(): Promise<User[] | string> {
+    const users = await this.usersRepository.find();
     return users.length > 0 ? users : 'Not exist users registered!';
   }
 
-  getUserByUuid(uuid: string): UserDto {
-    user = undefined;
-    let userFinded = false;
-    for(let u of users){
-      if(u.uuid == uuid){
-        user = u;
-        userFinded = true;
+  async getUserByUuid(uuid: string): Promise<User> {
+    let user = await this.usersRepository.findOne(uuid, {
+      where: {
+        uuid: uuid
       }
-    }
-    if(userFinded){
+    });
+    if(user && user != undefined){
       return user;
     }else {
       throw new BadRequestException(`Not exists user with uuid ${uuid}`);
     }
   }
 
-  editUser(uuid: string, age: number, name: string): any {
-    user = undefined;
-    let userFinded = false;
-    for(let u of users){
-      if(u.uuid == uuid){
-        u.username = (name != undefined) || (name != '') ? name : u.username;
-        u.age = age != undefined ? age : u.age;
-        u.updatedAt = new Date();
-        user = u;
-        userFinded = true;
+  async editUser(uuid: string, age: number, name: string): Promise<any> {
+    let user = await this.usersRepository.findOne(uuid, {
+      where: {
+        uuid: uuid
       }
-    }
-    if(userFinded){
-      return user;
+    })
+    if(user){
+      return await this.usersRepository.update(uuid, {
+        username: name,
+        age: age,
+        updatedAt: new Date()
+      });
     }else {
       throw new BadRequestException(`Not exists user with uuid ${uuid}`);
     }
   }
 
-  deleteUser(uuid: string): string {
-    let userFinded = false;
-    for(let u of users){
-      if(u.uuid == uuid){
-        const index = users.indexOf(u);
-        // delete users[index];
-        users.splice(index, 1)
-        userFinded = true;
+  async deleteUser(uuid: string): Promise<string> {
+    let user = await this.usersRepository.findOne(uuid, {
+      where: {
+        uuid: uuid
       }
-    }
-    if(userFinded){
+    });
+    if(user){
+      await this.usersRepository.softDelete(uuid);
       return uuid;
     }else {
       throw new BadRequestException(`Not exists user with uuid ${uuid}`);
