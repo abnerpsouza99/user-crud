@@ -5,9 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 
-let users: UserDto[] = [];
-let user: UserDto;
-
 @Injectable()
 export class UserService { 
 
@@ -24,14 +21,6 @@ export class UserService {
     console.log(`newUser.uuid`, newUser.uuid);
     return newUser.uuid;
   }
-
-  // getAllUsers(): UserDto[] | string { 
-  //   if(users.length == 0){
-  //     return 'Not exist users registered!';
-  //   }else {
-  //     return users;      
-  //   }
-  // }
 
   async getAllUsers(): Promise<User[] | string> {
     const users = await this.usersRepository.find();
@@ -75,7 +64,7 @@ export class UserService {
       }
     });
     if(user){
-      await this.usersRepository.softDelete(uuid);
+      await this.usersRepository.delete(uuid);
       return uuid;
     }else {
       throw new BadRequestException(`Not exists user with uuid ${uuid}`);
